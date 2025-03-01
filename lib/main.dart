@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reqresz/core/di/injection.dart' as di;
+import 'package:reqresz/features/auth/presentation/blocs/register_bloc.dart';
 import 'package:reqresz/features/auth/presentation/pages/login_page.dart';
 import 'package:reqresz/features/auth/presentation/blocs/login_bloc.dart';
+import 'package:reqresz/features/users/presentation/blocs/user_bloc.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +18,8 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => di.sl<LoginBloc>()), // Inject LoginBloc
+        BlocProvider(create: (_) => di.sl<RegisterBloc>()), // Inject LoginBloc
+        BlocProvider(create: (_) => di.sl<UserBloc>()), // Inject UserBloc
       ],
       child: MaterialApp(
         title: 'Reqresz App',
