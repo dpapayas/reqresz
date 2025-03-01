@@ -6,6 +6,7 @@ abstract class UserRemoteDataSource {
   Future<List<UserModel>> getUsers();
   Future<UserModel> createUser(String firstName, String lastName, String email);
   Future<User> updateUser(String id, String firstName, String lastName);
+  Future<void> deleteUser(String id);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -56,5 +57,16 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       lastName: response.data['last_name'],
       avatar: response.data['avatar'] ?? '',
     );
+  }
+
+  @override
+  Future<void> deleteUser(String userId) async {
+    final response = await apiClient.delete(
+      '/users/$userId'
+    );
+
+    if (response.statusCode != 204) {
+      throw ServerException(message: "Failed to delete user");
+    }
   }
 }

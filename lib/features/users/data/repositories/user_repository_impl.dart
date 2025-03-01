@@ -57,4 +57,14 @@ class UserRepositoryImpl implements UserRepository {
       return Left(NetworkFailure(message: "No internet connection"));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> deleteUser(String userId) async {
+    try {
+      await remoteDataSource.deleteUser(userId);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(message: "Failed to delete user"));
+    }
+  }
 }
