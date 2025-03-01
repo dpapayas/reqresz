@@ -43,4 +43,18 @@ class UserRepositoryImpl implements UserRepository {
       return Left(NetworkFailure(message: "No internet connection"));
     }
   }
+
+  @override
+  Future<Either<Failure, User>> updateUser(String id, String firstName, String lastName, String email) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final user = await remoteDataSource.updateUser(id, firstName, lastName);
+        return Right(user);
+      } catch (e) {
+        return Left(ServerFailure(message: "Failed to update user"));
+      }
+    } else {
+      return Left(NetworkFailure(message: "No internet connection"));
+    }
+  }
 }

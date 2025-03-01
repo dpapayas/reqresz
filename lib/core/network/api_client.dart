@@ -9,12 +9,12 @@ class ApiClient {
     required String baseUrl,
     required Logger logger,
   })  : _dio = Dio(
-          BaseOptions(
-            baseUrl: baseUrl,
-            connectTimeout: const Duration(seconds: 5),
-            receiveTimeout: const Duration(seconds: 3),
-          ),
-        ),
+    BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 3),
+    ),
+  ),
         _logger = logger {
     _setupInterceptors();
   }
@@ -41,10 +41,10 @@ class ApiClient {
   }
 
   Future<Response> get(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
+      String path, {
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+      }) async {
     try {
       final response = await _dio.get(
         path,
@@ -58,15 +58,51 @@ class ApiClient {
   }
 
   Future<Response> post(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
+      String path, {
+        dynamic data,
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+      }) async {
     try {
       final response = await _dio.post(
         path,
         data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
+      return response;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<Response> put(
+      String path, {
+        dynamic data,
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+      }) async {
+    try {
+      final response = await _dio.put(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
+      return response;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<Response> delete(
+      String path, {
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+      }) async {
+    try {
+      final response = await _dio.delete(
+        path,
         queryParameters: queryParameters,
         options: options,
       );

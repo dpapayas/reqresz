@@ -1,10 +1,11 @@
 import 'package:reqresz/core/network/api_client.dart';
 import 'package:reqresz/features/users/data/models/user_model.dart';
+import 'package:reqresz/features/users/domain/entities/user.dart';
 
 abstract class UserRemoteDataSource {
   Future<List<UserModel>> getUsers();
-
   Future<UserModel> createUser(String firstName, String lastName, String email);
+  Future<User> updateUser(String id, String firstName, String lastName);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -36,5 +37,24 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     );
 
     return UserModel.fromJson(response.data);
+  }
+
+  @override
+  Future<User> updateUser(String id, String firstName, String lastName) async {
+    final response = await apiClient.put(
+      '/users/$id',
+      data: {
+        "first_name": firstName,
+        "last_name": lastName,
+      },
+    );
+
+    return User(
+      id: id,
+      email: response.data['email'] ?? '',
+      firstName: response.data['first_name'],
+      lastName: response.data['last_name'],
+      avatar: response.data['avatar'] ?? '',
+    );
   }
 }
