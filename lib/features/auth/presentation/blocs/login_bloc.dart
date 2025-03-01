@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:reqresz/features/auth/domain/usecases/login_usecase.dart';
 import 'package:reqresz/core/error/failure.dart';
+import 'package:reqresz/features/auth/domain/usecases/login_usecase.dart';
 
 class LoginState {}
 
@@ -26,17 +26,15 @@ class LoginBloc extends Cubit<LoginState> {
 
   void login(String email, String password) async {
     emit(LoginLoading());
-    final result = await loginUseCase.doLogin(email, password);
+    final result = await loginUseCase(LoginParams(email: email, password: password));
 
     result.fold(
           (failure) {
-        String errorMessage = _mapFailureToMessage(failure);
-        Fluttertoast.showToast(msg: errorMessage);
-        emit(LoginError(errorMessage));
-      },
-          (token) {
-        emit(LoginSuccess(token));
-      },
+            String errorMessage = _mapFailureToMessage(failure);
+            Fluttertoast.showToast(msg: errorMessage);
+            emit(LoginError(errorMessage));
+          },
+          (user) => emit(LoginSuccess(user.token)),
     );
   }
 

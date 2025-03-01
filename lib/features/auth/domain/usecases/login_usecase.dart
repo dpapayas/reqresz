@@ -1,13 +1,23 @@
 import 'package:dartz/dartz.dart';
 import 'package:reqresz/core/error/failure.dart';
-import 'package:reqresz/features/auth/domain/repositories/auth_repository.dart';
+import 'package:reqresz/core/usecases/usecase.dart';
+import '../entities/user.dart';
+import '../repositories/auth_repository.dart';
 
-class LoginUseCase {
+class LoginUseCase implements UseCase<User, LoginParams> {
   final AuthRepository repository;
 
   LoginUseCase(this.repository);
 
-  Future<Either<Failure, String>> doLogin(String email, String password) async {
-    return await repository.login(email, password);
+  @override
+  Future<Either<Failure, User>> call(LoginParams params) {
+    return repository.login(params.email, params.password);
   }
+}
+
+class LoginParams {
+  final String email;
+  final String password;
+
+  LoginParams({required this.email, required this.password});
 }

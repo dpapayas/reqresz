@@ -1,28 +1,31 @@
 import 'package:get_it/get_it.dart';
-import 'package:reqresz/core/network/api_client.dart';
-import 'package:reqresz/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:reqresz/features/auth/domain/usecases/login_usecase.dart';
+import 'package:reqresz/features/auth/domain/usecases/register_usecase.dart';
+import 'package:reqresz/features/auth/presentation/blocs/login_bloc.dart';
+import 'package:reqresz/features/auth/presentation/blocs/register_bloc.dart';
 import 'package:reqresz/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:reqresz/features/auth/domain/repositories/auth_repository.dart';
-import 'package:reqresz/features/auth/domain/usecases/login_usecase.dart';
-import 'package:reqresz/features/auth/presentation/blocs/login_bloc.dart';
+import 'package:reqresz/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:reqresz/core/network/api_client.dart';
 import 'package:logger/logger.dart';
 
 final sl = GetIt.instance;
 
 void init() {
-  // 🔹 Core
-  sl.registerLazySingleton(() => Logger());
-  sl.registerLazySingleton(() => ApiClient(baseUrl: 'https://reqres.in/', logger: sl<Logger>()));
+  // Network
+  sl.registerLazySingleton(() => ApiClient(baseUrl: 'https://reqres.in/api', logger: Logger()));
 
-  // 🔹 Data Sources
-  sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(sl<ApiClient>()));
+  // Data sources
+  sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(sl()));
 
-  // 🔹 Repository
-  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(remoteDataSource: sl<AuthRemoteDataSource>()));
+  // Repository
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
 
-  // 🔹 Use Case
-  sl.registerLazySingleton(() => LoginUseCase(sl<AuthRepository>()));
+  // Use cases
+  sl.registerLazySingleton(() => LoginUseCase(sl()));
+  sl.registerLazySingleton(() => RegisterUseCase(sl()));
 
-  // 🔹 Bloc / Cubit
-  sl.registerFactory(() => LoginBloc(sl<LoginUseCase>()));
+  // Blocs
+  sl.registerFactory(() => LoginBloc(sl()));
+  sl.registerFactory(() => RegisterBloc(sl()));
 }
