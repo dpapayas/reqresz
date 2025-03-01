@@ -1,21 +1,46 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failure.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/repositories/user_repository.dart';
-import '../datasources/user_remote_data_source.dart';
+import 'package:reqresz/core/error/failure.dart';
+import 'package:reqresz/core/network/network_info.dart';
+import 'package:reqresz/features/users/data/datasources/user_remote_data_source.dart';
+import 'package:reqresz/features/users/domain/entities/user.dart';
+import 'package:reqresz/features/users/domain/repositories/user_repository.dart';
 
 class UserRepositoryImpl implements UserRepository {
   final UserRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
-  UserRepositoryImpl(this.remoteDataSource);
+  UserRepositoryImpl({
+    required this.remoteDataSource,
+    required this.networkInfo,
+  });
 
   @override
   Future<Either<Failure, List<User>>> getUsers() async {
-    try {
-      final users = await remoteDataSource.getUsers();
-      return Right(users);
-    } catch (e) {
-      return Left(ServerFailure(message: 'Failed to fetch users'));
+    if (await networkInfo.isConnected) {
+      try {
+        final users = await remoteDataSource.getUsers();
+        return Right(users);
+      } catch (e) {
+        return Left(ServerFailure(message: 'Failed to fetch users'));
+      }
+    } else {
+      return Left(NetworkFailure(message: "No internet connection"));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> createUser(
+      String firstName, String lastName, String email) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final user =
+            await remoteDataSource.createUser(firstName, lastName, email);
+        return Right(user);
+      } catch (e) {
+        return Left(ServerFailure(message: "Failed to create user"));
+      }
+    } else {
+      return Left(NetworkFailure(message: "No internet connection"));
     }
   }
 }

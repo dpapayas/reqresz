@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/user_bloc.dart';
+import 'package:reqresz/features/users/presentation/blocs/user_bloc.dart';
 
 class UserListPage extends StatelessWidget {
   const UserListPage({super.key});
@@ -20,7 +20,7 @@ class UserListPage extends StatelessWidget {
                 final user = state.users[index];
                 return ListTile(
                   leading: CircleAvatar(backgroundImage: NetworkImage(user.avatar)),
-                  title: Text(user.name),
+                  title: Text(user.firstName),
                   subtitle: Text(user.email),
                 );
               },

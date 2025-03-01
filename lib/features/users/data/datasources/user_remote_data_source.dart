@@ -3,6 +3,8 @@ import 'package:reqresz/features/users/data/models/user_model.dart';
 
 abstract class UserRemoteDataSource {
   Future<List<UserModel>> getUsers();
+
+  Future<UserModel> createUser(String firstName, String lastName, String email);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -19,5 +21,20 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     } catch (e) {
       throw Exception('Failed to fetch users');
     }
+  }
+
+  @override
+  Future<UserModel> createUser(
+      String firstName, String lastName, String email) async {
+    final response = await apiClient.post(
+      '/users',
+      data: {
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+      },
+    );
+
+    return UserModel.fromJson(response.data);
   }
 }

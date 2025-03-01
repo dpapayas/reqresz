@@ -31,7 +31,12 @@ void init() {
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl(), sl())); // Pass NetworkInfo
-  sl.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(sl()));
+  sl.registerLazySingleton<UserRepository>(
+        () => UserRepositoryImpl(
+      remoteDataSource: sl<UserRemoteDataSource>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
 
   // Use cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
