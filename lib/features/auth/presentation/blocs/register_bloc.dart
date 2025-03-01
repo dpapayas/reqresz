@@ -1,38 +1,32 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dartz/dartz.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:reqresz/core/error/failure.dart';
 import 'package:reqresz/features/auth/domain/usecases/register_usecase.dart';
+import 'package:reqresz/features/auth/presentation/blocs/register_event.dart';
+import 'package:reqresz/features/auth/presentation/blocs/register_state.dart';
 
-class RegisterState {}
-
-class RegisterInitial extends RegisterState {}
-
-class RegisterLoading extends RegisterState {}
-
-class RegisterSuccess extends RegisterState {
-  final String token;
-  RegisterSuccess(this.token);
-}
-
-class RegisterError extends RegisterState {
-  final String message;
-  RegisterError(this.message);
-}
-
-class RegisterBloc extends Cubit<RegisterState> {
+class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   final RegisterUseCase registerUseCase;
 
-  RegisterBloc(this.registerUseCase) : super(RegisterInitial());
+  RegisterBloc(this.registerUseCase) : super(RegisterInitial()) {
+    on<RegisterRequested>(_onRegisterRequested);
+  }
 
-  void register(String email, String password) async {
+  Future<void> _onRegisterRequested(
+      RegisterRequested event, Emitter<RegisterState> emit) async {
     emit(RegisterLoading());
-    final result = await registerUseCase(RegisterParams(email: email, password: password));
+
+    final result = await registerUseCase.call(RegisterParams(
+      email: event.email,
+      password: event.password,
+    ));
 
     result.fold(
           (failure) {
             String errorMessage = _mapFailureToMessage(failure);
             Fluttertoast.showToast(msg: errorMessage);
-            emit(RegisterError(errorMessage));
+            emit(RegisterFailure(errorMessage));
           },
           (user) => emit(RegisterSuccess(user.token)),
     );

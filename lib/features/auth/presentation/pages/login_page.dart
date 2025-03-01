@@ -1,74 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:reqresz/features/auth/presentation/blocs/login_bloc.dart';
-import 'package:reqresz/core/di/injection.dart';
+import '../blocs/login_bloc.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class LoginPage extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
+  LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
-      body: BlocProvider(
-        create: (context) => sl<LoginBloc>(),
-        child: BlocListener<LoginBloc, LoginState>(
-          listener: (context, state) {
-            if (state is LoginLoading) {
-              setState(() => _isLoading = true);
-            } else if (state is LoginSuccess) {
-              setState(() => _isLoading = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Login Successful: ${state.token}')),
-              );
-            } else if (state is LoginError) {
-              setState(() {
-                _isLoading = false;
-                _errorMessage = state.message;
-              });
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(labelText: 'Email'),
-                ),
-                TextField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                ),
-                const SizedBox(height: 20),
-                if (_errorMessage != null)
-                  Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
-                const SizedBox(height: 10),
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            const SizedBox(height: 20),
+            BlocConsumer<LoginBloc, LoginState>(
+              listener: (context, state) {
+                if (state is LoginSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Login Successful! Token: ${state.token}')),
+                  );
+                } else if (state is LoginFailure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message)),
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is LoginLoading) {
+                  return const CircularProgressIndicator();
+                }
+                return ElevatedButton(
                   onPressed: () {
-                    context.read<LoginBloc>().login(
-                      _emailController.text,
-                      _passwordController.text,
-                    );
+                    final email = emailController.text.trim();
+                    final password = passwordController.text.trim();
+                    context.read<LoginBloc>().add(LoginRequested(email: email, password: password));
                   },
                   child: const Text('Login'),
-                ),
-              ],
+                );
+              },
             ),
-          ),
+          ],
         ),
       ),
     );

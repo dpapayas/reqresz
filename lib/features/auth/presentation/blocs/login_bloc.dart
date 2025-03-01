@@ -1,41 +1,34 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:reqresz/core/error/failure.dart';
 import 'package:reqresz/features/auth/domain/usecases/login_usecase.dart';
 
-class LoginState {}
+part 'login_event.dart';
 
-class LoginInitial extends LoginState {}
+part 'login_state.dart';
 
-class LoginLoading extends LoginState {}
-
-class LoginSuccess extends LoginState {
-  final String token;
-  LoginSuccess(this.token);
-}
-
-class LoginError extends LoginState {
-  final String message;
-  LoginError(this.message);
-}
-
-class LoginBloc extends Cubit<LoginState> {
+class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginUseCase loginUseCase;
 
-  LoginBloc(this.loginUseCase) : super(LoginInitial());
+  LoginBloc(this.loginUseCase) : super(LoginInitial()) {
+    on<LoginRequested>(_onLoginRequested);
+  }
 
-  void login(String email, String password) async {
+  Future<void> _onLoginRequested(
+      LoginRequested event, Emitter<LoginState> emit) async {
     emit(LoginLoading());
-    final result = await loginUseCase(LoginParams(email: email, password: password));
 
-    result.fold(
-          (failure) {
-            String errorMessage = _mapFailureToMessage(failure);
-            Fluttertoast.showToast(msg: errorMessage);
-            emit(LoginError(errorMessage));
-          },
-          (user) => emit(LoginSuccess(user.token)),
-    );
+    final result = await loginUseCase.call(LoginParams(
+      email: event.email,
+      password: event.password,
+    ));
+
+    result.fold((failure) {
+      String errorMessage = _mapFailureToMessage(failure);
+      Fluttertoast.showToast(msg: errorMessage);
+      emit(LoginFailure(errorMessage));
+    }, (user) => emit(LoginSuccess(user.token)));
   }
 
   String _mapFailureToMessage(Failure failure) {
