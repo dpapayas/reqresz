@@ -4,6 +4,7 @@ import 'package:reqresz/core/usecases/usecase.dart';
 import 'package:reqresz/features/users/domain/entities/user.dart';
 import 'package:reqresz/features/users/domain/usecases/get_users_usecase.dart';
 import 'package:reqresz/features/users/domain/usecases/update_user_usecase.dart';
+import 'package:reqresz/features/users/domain/usecases/delete_user_usecase.dart';
 
 part 'user_event.dart';
 part 'user_state.dart';
@@ -11,8 +12,15 @@ part 'user_state.dart';
 class UserBloc extends Bloc<UserEvent, UserState> {
   final GetUsersUseCase getUsersUseCase;
   final UpdateUserUseCase updateUserUseCase;
+  final DeleteUserUseCase deleteUserUseCase;
 
-  UserBloc({required this.getUsersUseCase, required this.updateUserUseCase}) : super(UserInitial()) {
+  UserBloc({
+    required this.getUsersUseCase,
+    required this.updateUserUseCase,
+    required this.deleteUserUseCase,
+  }) : super(UserInitial()) {
+
+    // Load Users
     on<LoadUsers>((event, emit) async {
       emit(UserLoading());
       final result = await getUsersUseCase(NoParams());
@@ -22,36 +30,57 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       );
     });
 
+    // Update User
     on<UpdateUser>((event, emit) async {
       if (state is UserLoaded) {
         final currentState = state as UserLoaded;
+        try {
+          emit(UserLoading());
 
-        emit(UserLoading());
+          final result = await updateUserUseCase(UpdateUserParams(
+            id: event.userId,
+            firstName: event.firstName,
+            lastName: event.lastName,
+            email: event.email,
+          ));
 
-        final result = await updateUserUseCase(UpdateUserParams(
-          id: event.userId,
-          firstName: event.firstName,
-          lastName: event.lastName,
-          email: event.email,
-        ));
+          result.fold(
+                (failure) => emit(UserError(failure.message)),
+                (updatedUser) {
+              final updatedUsers = currentState.users.map((user) {
+                return user.id == event.userId ? updatedUser : user;
+              }).toList();
 
-        result.fold(
-              (failure) {
-            emit(UserError(failure.message));
-          },
-              (updatedUser) {
-            if (updatedUser == null) {
-              emit(UserError("Failed to update user, response is null"));
-              return;
-            }
+              emit(UserLoaded(updatedUsers));
+            },
+          );
+        } catch (e) {
+          emit(UserError("Failed to update user"));
+        }
+      }
+    });
 
-            final updatedUsers = currentState.users.map((user) {
-              return user.id == event.userId ? updatedUser : user;
-            }).toList();
+    // Delete User
+    on<DeleteUser>((event, emit) async {
+      if (state is UserLoaded) {
+        final currentState = state as UserLoaded;
+        try {
+          emit(UserLoading());
 
-            emit(UserLoaded(updatedUsers));
-          },
-        );
+          final result = await deleteUserUseCase(event.userId);
+
+          result.fold(
+                (failure) => emit(UserError(failure.message)),
+                (_) {
+              final updatedUsers =
+              currentState.users.where((user) => user.id != event.userId).toList();
+
+              emit(UserLoaded(updatedUsers));
+            },
+          );
+        } catch (e) {
+          emit(UserError("Failed to delete user"));
+        }
       }
     });
   }

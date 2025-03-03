@@ -15,10 +15,10 @@ import 'package:reqresz/features/auth/presentation/blocs/register_bloc.dart';
 import 'package:reqresz/features/users/data/datasources/user_remote_data_source.dart';
 import 'package:reqresz/features/users/data/repositories/user_repository_impl.dart';
 import 'package:reqresz/features/users/domain/repositories/user_repository.dart';
+import 'package:reqresz/features/users/domain/usecases/delete_user_usecase.dart';
 import 'package:reqresz/features/users/domain/usecases/get_users_usecase.dart';
 import 'package:reqresz/features/users/domain/usecases/update_user_usecase.dart';
 import 'package:reqresz/features/users/presentation/blocs/user_bloc.dart';
-import 'package:reqresz/features/users/presentation/blocs/update_user_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
@@ -51,6 +51,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
   sl.registerLazySingleton<GetUsersUseCase>(() => GetUsersUseCase(sl()));
   sl.registerLazySingleton<UpdateUserUseCase>(() => UpdateUserUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteUserUseCase(sl()));
 
   // Blocs
   sl.registerFactory(() => LoginBloc(sl(), sl(), sl()));
@@ -58,6 +59,7 @@ Future<void> init() async {
   sl.registerFactory(() => UserBloc(
     getUsersUseCase: sl<GetUsersUseCase>(),
     updateUserUseCase: sl<UpdateUserUseCase>(),
+    deleteUserUseCase: sl<DeleteUserUseCase>(),
   ));
 
   // SharedPreferences

@@ -16,7 +16,7 @@ class DeleteUserBloc extends Bloc<DeleteUserEvent, DeleteUserState> {
       DeleteUserRequested event, Emitter<DeleteUserState> emit) async {
     emit(DeleteUserLoading());
 
-    final result = await deleteUserUseCase.execute(event.userId);
+    final result = await deleteUserUseCase.call(event.userId);
 
     result.fold(
           (failure) => emit(DeleteUserFailure(message: _mapFailureToMessage(failure))),

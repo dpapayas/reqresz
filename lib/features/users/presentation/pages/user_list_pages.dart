@@ -30,13 +30,45 @@ class _UserListPageState extends State<UserListPage> {
               itemBuilder: (context, index) {
                 final user = state.users[index];
 
-                return ListTile(
-                  leading: CircleAvatar(backgroundImage: NetworkImage(user.avatar)),
-                  title: Text('${user.firstName} ${user.lastName}'),
-                  subtitle: Text(user.email),
-                  onLongPress: () {
-                    _showUpdateDialog(context, user);
+                return Dismissible(
+                  key: Key(user.id), // Gunakan ID unik untuk setiap item
+                  direction: DismissDirection.endToStart, // Hanya swipe ke kiri
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  confirmDismiss: (direction) async {
+                    return await showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Delete User'),
+                        content: const Text('Are you sure you want to delete this user?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      ),
+                    );
                   },
+                  onDismissed: (direction) {
+                    context.read<UserBloc>().add(DeleteUser(userId: user.id));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${user.firstName} deleted')),
+                    );
+                  },
+                  child: ListTile(
+                    leading: CircleAvatar(backgroundImage: NetworkImage(user.avatar)),
+                    title: Text('${user.firstName} ${user.lastName}'),
+                    subtitle: Text(user.email),
+                  ),
                 );
               },
             );
