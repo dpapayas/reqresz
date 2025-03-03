@@ -8,7 +8,7 @@ import 'package:reqresz/features/auth/data/datasources/auth_remote_data_source.d
 import 'package:reqresz/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:reqresz/features/auth/domain/repositories/auth_repository.dart';
 import 'package:reqresz/features/auth/domain/usecases/login_usecase.dart';
-import 'package:reqresz/features/auth/domain/usecases/logout_usecase.dart';  // ✅ ADD Logout UseCase
+import 'package:reqresz/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:reqresz/features/auth/domain/usecases/register_usecase.dart';
 import 'package:reqresz/features/auth/presentation/blocs/login_bloc.dart';
 import 'package:reqresz/features/auth/presentation/blocs/register_bloc.dart';
@@ -17,10 +17,11 @@ import 'package:reqresz/features/users/data/repositories/user_repository_impl.da
 import 'package:reqresz/features/users/domain/repositories/user_repository.dart';
 import 'package:reqresz/features/users/domain/usecases/get_users_usecase.dart';
 import 'package:reqresz/features/users/presentation/blocs/user_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
 
-void init() {
+Future<void> init() async {
   // Network
   sl.registerLazySingleton(() => ApiClient(baseUrl: 'https://reqres.in/api', logger: Logger()));
   sl.registerLazySingleton<Connectivity>(() => Connectivity());
@@ -49,7 +50,11 @@ void init() {
   sl.registerLazySingleton<GetUsersUseCase>(() => GetUsersUseCase(sl()));
 
   // Blocs
-  sl.registerFactory(() => LoginBloc(sl(), sl()));
+  sl.registerFactory(() => LoginBloc(sl(), sl(), sl()));
   sl.registerFactory(() => RegisterBloc(sl()));
   sl.registerFactory(() => UserBloc(sl()));
+
+  // SharedPreferences
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
 }

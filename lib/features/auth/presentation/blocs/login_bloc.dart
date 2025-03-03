@@ -1,21 +1,22 @@
-import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:reqresz/core/error/failure.dart';
+import 'package:reqresz/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:reqresz/features/auth/domain/usecases/login_usecase.dart';
 import 'package:reqresz/features/auth/domain/usecases/logout_usecase.dart';
 
 part 'login_event.dart';
-
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginUseCase loginUseCase;
   final LogoutUseCase logoutUseCase;
+  final AuthLocalDataSource localDataSource;
 
-  LoginBloc(this.loginUseCase, this.logoutUseCase) : super(LoginInitial()) {
+  LoginBloc(this.loginUseCase, this.logoutUseCase, this.localDataSource) : super(LoginInitial()) {
     on<LoginRequested>(_onLoginRequested);
+    on<CheckUserSession>(_onCheckUserSession);
     on<LogoutRequested>(_onLogoutRequested);
   }
 
@@ -32,18 +33,26 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       String errorMessage = _mapFailureToMessage(failure);
       Fluttertoast.showToast(msg: errorMessage);
       emit(LoginFailure(errorMessage));
-    }, (user) => emit(LoginSuccess(user.token)));
+    }, (user) async {
+      await localDataSource.saveToken(user.token); // ✅ Simpan token setelah login
+      emit(LoginSuccess(user.token));
+    });
+  }
+
+  Future<void> _onCheckUserSession(
+      CheckUserSession event, Emitter<LoginState> emit) async {
+    final token = await localDataSource.getToken();
+    if (token != null) {
+      emit(LoginSuccess(token)); // ✅ Jika ada token, berarti sudah login
+    } else {
+      emit(LoginInitial()); // ✅ Jika tidak ada token, kembali ke awal
+    }
   }
 
   Future<void> _onLogoutRequested(
       LogoutRequested event, Emitter<LoginState> emit) async {
-    final result = await logoutUseCase.call();
-
-    result.fold((failure) {
-      Fluttertoast.showToast(msg: "Logout Failed");
-    }, (_) {
-      emit(LoginInitial());
-    });
+    await localDataSource.clearSession(); // ✅ Hapus token saat logout
+    emit(LoginInitial());
   }
 
   String _mapFailureToMessage(Failure failure) {

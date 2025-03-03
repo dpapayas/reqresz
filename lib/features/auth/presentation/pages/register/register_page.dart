@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '../blocs/register_bloc.dart';
-import '../blocs/register_event.dart';
-import '../blocs/register_state.dart';
+import '../../blocs/register_bloc.dart';
+import '../../blocs/register_event.dart';
+import '../../blocs/register_state.dart';
 
 class RegisterPage extends StatefulWidget {
   @override

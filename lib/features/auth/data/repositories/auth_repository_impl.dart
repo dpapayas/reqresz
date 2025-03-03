@@ -11,7 +11,8 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final NetworkInfo networkInfo;
 
-  AuthRepositoryImpl(this.remoteDataSource, this.networkInfo, this.localDataSource);
+  AuthRepositoryImpl(
+      this.remoteDataSource, this.networkInfo, this.localDataSource);
 
   @override
   Future<Either<Failure, User>> login(String email, String password) async {
