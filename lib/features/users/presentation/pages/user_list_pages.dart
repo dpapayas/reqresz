@@ -2,8 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reqresz/features/users/presentation/blocs/user_bloc.dart';
 
-class UserListPage extends StatelessWidget {
+class UserListPage extends StatefulWidget {
   const UserListPage({super.key});
+
+  @override
+  State<UserListPage> createState() => _UserListPageState();
+}
+
+class _UserListPageState extends State<UserListPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<UserBloc>().add(LoadUsers()); // Auto load users on page load
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,23 +29,73 @@ class UserListPage extends StatelessWidget {
               itemCount: state.users.length,
               itemBuilder: (context, index) {
                 final user = state.users[index];
+
                 return ListTile(
                   leading: CircleAvatar(backgroundImage: NetworkImage(user.avatar)),
-                  title: Text(user.firstName),
+                  title: Text('${user.firstName} ${user.lastName}'),
                   subtitle: Text(user.email),
+                  onLongPress: () {
+                    _showUpdateDialog(context, user);
+                  },
                 );
               },
             );
           } else if (state is UserError) {
             return Center(child: Text(state.message));
           }
-          return const Center(child: Text('Press the button to fetch users'));
+          return const Center(child: Text('No users available'));
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.read<UserBloc>().add(LoadUsers()),
-        child: const Icon(Icons.refresh),
-      ),
+    );
+  }
+
+  void _showUpdateDialog(BuildContext context, user) {
+    final firstNameController = TextEditingController(text: user.firstName);
+    final lastNameController = TextEditingController(text: user.lastName);
+    final emailController = TextEditingController(text: user.email);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Update User"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: firstNameController,
+                decoration: const InputDecoration(labelText: "First Name"),
+              ),
+              TextField(
+                controller: lastNameController,
+                decoration: const InputDecoration(labelText: "Last Name"),
+              ),
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: "Email"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.read<UserBloc>().add(UpdateUser(
+                  userId: user.id.toString(),
+                  firstName: firstNameController.text,
+                  lastName: lastNameController.text,
+                  email: emailController.text,
+                ));
+                Navigator.pop(context);
+              },
+              child: const Text("Update"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+          ],
+        );
+      },
     );
   }
 }

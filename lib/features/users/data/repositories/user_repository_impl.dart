@@ -48,7 +48,7 @@ class UserRepositoryImpl implements UserRepository {
   Future<Either<Failure, User>> updateUser(String id, String firstName, String lastName, String email) async {
     if (await networkInfo.isConnected) {
       try {
-        final user = await remoteDataSource.updateUser(id, firstName, lastName);
+        final user = await remoteDataSource.updateUser(id, firstName, lastName, email);
         return Right(user);
       } catch (e) {
         return Left(ServerFailure(message: "Failed to update user"));

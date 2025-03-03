@@ -5,7 +5,7 @@ import 'package:reqresz/features/users/domain/entities/user.dart';
 abstract class UserRemoteDataSource {
   Future<List<UserModel>> getUsers();
   Future<UserModel> createUser(String firstName, String lastName, String email);
-  Future<User> updateUser(String id, String firstName, String lastName);
+  Future<User> updateUser(String id, String firstName, String lastName, String email);
   Future<void> deleteUser(String id);
 }
 
@@ -41,22 +41,17 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  Future<User> updateUser(String id, String firstName, String lastName) async {
+  Future<User> updateUser(String id, String firstName, String lastName, email) async {
     final response = await apiClient.put(
       '/users/$id',
       data: {
         "first_name": firstName,
         "last_name": lastName,
+        "email": email,
       },
     );
 
-    return User(
-      id: id,
-      email: response.data['email'] ?? '',
-      firstName: response.data['first_name'],
-      lastName: response.data['last_name'],
-      avatar: response.data['avatar'] ?? '',
-    );
+    return UserModel.fromJson(response.data);
   }
 
   @override

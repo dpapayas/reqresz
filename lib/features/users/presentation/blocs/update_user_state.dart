@@ -1,5 +1,4 @@
-import 'package:equatable/equatable.dart';
-import 'package:reqresz/features/users/domain/entities/user.dart';
+part of 'update_user_bloc.dart';
 
 abstract class UpdateUserState extends Equatable {
   @override
@@ -11,18 +10,18 @@ class UpdateUserInitial extends UpdateUserState {}
 class UpdateUserLoading extends UpdateUserState {}
 
 class UpdateUserSuccess extends UpdateUserState {
-  final User   updatedUser;
+  final User updatedUser;
 
-  UpdateUserSuccess({required this.updatedUser});
+  UpdateUserSuccess(this.updatedUser);
 
   @override
   List<Object?> get props => [updatedUser];
 }
 
-class UpdateUserFailure extends UpdateUserState {
+class UpdateUserError extends UpdateUserState {
   final String message;
 
-  UpdateUserFailure({required this.message});
+  UpdateUserError(this.message);
 
   @override
   List<Object?> get props => [message];

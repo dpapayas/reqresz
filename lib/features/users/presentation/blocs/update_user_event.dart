@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+part of 'update_user_bloc.dart';
 
 abstract class UpdateUserEvent extends Equatable {
   @override

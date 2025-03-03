@@ -16,7 +16,9 @@ import 'package:reqresz/features/users/data/datasources/user_remote_data_source.
 import 'package:reqresz/features/users/data/repositories/user_repository_impl.dart';
 import 'package:reqresz/features/users/domain/repositories/user_repository.dart';
 import 'package:reqresz/features/users/domain/usecases/get_users_usecase.dart';
+import 'package:reqresz/features/users/domain/usecases/update_user_usecase.dart';
 import 'package:reqresz/features/users/presentation/blocs/user_bloc.dart';
+import 'package:reqresz/features/users/presentation/blocs/update_user_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
@@ -48,11 +50,15 @@ Future<void> init() async {
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
   sl.registerLazySingleton<GetUsersUseCase>(() => GetUsersUseCase(sl()));
+  sl.registerLazySingleton<UpdateUserUseCase>(() => UpdateUserUseCase(sl()));
 
   // Blocs
   sl.registerFactory(() => LoginBloc(sl(), sl(), sl()));
   sl.registerFactory(() => RegisterBloc(sl()));
-  sl.registerFactory(() => UserBloc(sl()));
+  sl.registerFactory(() => UserBloc(
+    getUsersUseCase: sl<GetUsersUseCase>(),
+    updateUserUseCase: sl<UpdateUserUseCase>(),
+  ));
 
   // SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();

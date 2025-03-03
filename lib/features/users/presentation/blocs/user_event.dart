@@ -6,3 +6,15 @@ abstract class UserEvent extends Equatable {
 }
 
 class LoadUsers extends UserEvent {}
+
+class UpdateUser extends UserEvent {
+  final String userId;
+  final String firstName;
+  final String lastName;
+  final String email;
+
+  UpdateUser({required this.userId, required this.firstName, required this.lastName, required this.email});
+
+  @override
+  List<Object> get props => [userId, firstName, email];
+}
