@@ -7,14 +7,34 @@ abstract class LoginEvent extends Equatable {
 
 class CheckUserSession extends LoginEvent {}
 
-class LoginRequested extends LoginEvent {
+class LoginEmailChanged extends LoginEvent {
+  final String email;
+
+  LoginEmailChanged(this.email);
+
+  @override
+  List<Object> get props => [email];
+}
+
+class LoginPasswordChanged extends LoginEvent {
+  final String password;
+
+  LoginPasswordChanged(this.password);
+
+  @override
+  List<Object> get props => [password];
+}
+
+class LoginSubmitted extends LoginEvent {
   final String email;
   final String password;
 
-  LoginRequested({required this.email, required this.password});
+  LoginSubmitted(this.email, this.password);
 
   @override
   List<Object> get props => [email, password];
 }
+
+class TogglePasswordVisibility extends LoginEvent {}
 
 class LogoutRequested extends LoginEvent {}

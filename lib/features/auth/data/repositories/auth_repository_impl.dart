@@ -15,13 +15,13 @@ class AuthRepositoryImpl implements AuthRepository {
       this.remoteDataSource, this.networkInfo, this.localDataSource);
 
   @override
-  Future<Either<Failure, User>> login(String email, String password) async {
+  Future<Either<Failure, String>> login(String email, String password) async {
     if (await networkInfo.isConnected) {
       try {
-        final user = await remoteDataSource.login(email, password);
-        await localDataSource.saveToken(user.token);
+        final token = await remoteDataSource.login(email, password);
+        await localDataSource.saveToken(token);
 
-        return Right(user);
+        return Right(token);
       } catch (e) {
         return Left(ServerFailure(message: "Login failed"));
       }

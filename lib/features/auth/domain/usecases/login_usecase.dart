@@ -4,13 +4,13 @@ import 'package:reqresz/core/usecases/usecase.dart';
 import '../entities/user.dart';
 import '../repositories/auth_repository.dart';
 
-class LoginUseCase implements UseCase<User, LoginParams> {
+class LoginUseCase implements UseCase<String, LoginParams> {
   final AuthRepository repository;
 
   LoginUseCase(this.repository);
 
   @override
-  Future<Either<Failure, User>> call(LoginParams params) {
+  Future<Either<Failure, String>> call(LoginParams params) {
     return repository.login(params.email, params.password);
   }
 }

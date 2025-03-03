@@ -3,7 +3,7 @@ import '../../domain/entities/user.dart';
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<User> login(String email, String password);
+  Future<String> login(String email, String password);
   Future<User> register(String email, String password);
 }
 
@@ -13,7 +13,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this.apiClient);
 
   @override
-  Future<User> login(String email, String password) async {
+  Future<String> login(String email, String password) async {
     try {
       final response = await apiClient.post(
         '/login',
@@ -23,7 +23,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         },
       );
 
-      return UserModel.fromJson(response.data);
+      return response.data['token'];
     } catch (e) {
       throw e;
     }
