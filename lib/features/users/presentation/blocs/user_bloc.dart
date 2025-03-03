@@ -67,13 +67,13 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         try {
           emit(UserLoading());
 
-          final result = await deleteUserUseCase(event.userId);
+          final result = await deleteUserUseCase(event.id);
 
           result.fold(
                 (failure) => emit(UserError(failure.message)),
                 (_) {
               final updatedUsers =
-              currentState.users.where((user) => user.id != event.userId).toList();
+              currentState.users.where((user) => user.id != event.id).toList();
 
               emit(UserLoaded(updatedUsers));
             },

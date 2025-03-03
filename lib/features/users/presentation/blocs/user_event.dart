@@ -20,10 +20,10 @@ class UpdateUser extends UserEvent {
 }
 
 class DeleteUser extends UserEvent {
-  final String userId;
+  final String id;
 
-  DeleteUser({required this.userId});
+  DeleteUser({required this.id});
 
   @override
-  List<Object> get props => [userId];
+  List<Object> get props => [id];
 }
